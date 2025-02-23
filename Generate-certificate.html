@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Certificate</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .certificate-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <h2>Congratulations, <span id="user-name"></span>!</h2>
+        <p>You have successfully completed the <span id="course-name"></span> course.</p>
+        <p>Awarded on: <span id="date"></span></p>
+        <button id="download-btn" class="hidden" onclick="generateCertificate()">Download Certificate</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let userScore = localStorage.getItem("quizScore");
+            let userName = localStorage.getItem("userName") || "Student";
+            let courseName = localStorage.getItem("courseName") || "Course";
+            let passPercentage = 0.8; // 80% pass mark
+
+            document.getElementById("user-name").textContent = userName;
+            document.getElementById("course-name").textContent = courseName;
+            document.getElementById("date").textContent = new Date().toLocaleDateString();
+
+            if (userScore && (Number(userScore) / 10) >= passPercentage) {
+                document.getElementById("download-btn").classList.remove("hidden");
+            }
+        });
+
+        function generateCertificate() {
+            let userName = localStorage.getItem("userName") || "Student";
+            let courseName = localStorage.getItem("courseName") || "Course";
+            const { jsPDF } = window.jspdf;
+            let doc = new jsPDF({ orientation: "landscape" });
+
+            let img = new Image();
+            img.src = 'certificate-template.jpg'; // Ensure you have this image in the project directory
+            img.onload = function() {
+                doc.addImage(img, 'JPEG', 0, 0, 297, 210); // A4 landscape size
+                
+                doc.setFont("times", "bold");
+                doc.setFontSize(30);
+                doc.text("Certificate of Completion", 148.5, 60, { align: "center" });
+
+                doc.setFontSize(18);
+                doc.text("This is to certify that", 148.5, 90, { align: "center" });
+                
+                doc.setFont("times", "bold");
+                doc.setFontSize(24);
+                doc.text(userName, 148.5, 110, { align: "center" });
+
+                doc.setFont("times", "normal");
+                doc.setFontSize(18);
+                doc.text("has successfully completed the", 148.5, 130, { align: "center" });
+                doc.text(courseName + " course.", 148.5, 150, { align: "center" });
+                
+                doc.text("Awarded on: " + new Date().toLocaleDateString(), 148.5, 170, { align: "center" });
+
+                doc.save(`${userName}_Certificate.pdf`);
+            };
+        }
+    </script>
+</body>
+</html>
